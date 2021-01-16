@@ -16,16 +16,23 @@ public class ImageFilterBot {
     public static final String DESTINATION_FOLDER = "downloads";
 
     private static long ownerId = 0;
+    private static long channelId = 0;
     private static JDA jda;
-    private static ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static final Set<String> images = new LinkedHashSet<>();
+    private static int warnPercentage = -1;
+    private static int banPercentage = -1;
+
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public static void main(String[] args) {
 
         Pattern tokenPattern = Pattern.compile("^token:");
         Pattern imagePattern = Pattern.compile("^image:");
         Pattern ownerPattern = Pattern.compile("^ownerId:");
+        Pattern channelPattern = Pattern.compile("^channelId:");
+        Pattern warnPercentagePattern = Pattern.compile("^warn:");
+        Pattern banPercentagePattern = Pattern.compile("^ban:");
 
-        Set<String> images = new LinkedHashSet<>();
         String botToken = null;
 
         for (String arg : args) {
@@ -36,12 +43,27 @@ public class ImageFilterBot {
             } else if (ownerPattern.matcher(arg).find()) {
                 try {
                     ImageFilterBot.ownerId = Long.parseLong(arg.replace("ownerId:", ""));
+                    System.out.println("Loaded owner id: " + ownerId);
                 } catch (Exception exception) {
                     System.out.println("Bad owner id!");
                     return;
                 }
             } else if (tokenPattern.matcher(arg).find()) {
                 botToken = arg.replace("token:", "");
+            } else if (warnPercentagePattern.matcher(arg).find()){
+                warnPercentage = Integer.parseInt(arg.replace("warn:", ""));
+                System.out.println("Warn: " + warnPercentage);
+            } else if (banPercentagePattern.matcher(arg).find()){
+                banPercentage = Integer.parseInt(arg.replace("ban:", ""));
+                System.out.println("Ban: " + banPercentage);
+            }else if (channelPattern.matcher(arg).find()) {
+                try {
+                    ImageFilterBot.channelId = Long.parseLong(arg.replace("channelId:", ""));
+                    System.out.println("Loaded channel id: " + channelId);
+                } catch (Exception exception) {
+                    System.out.println("Bad channel id!");
+                    return;
+                }
             }
         }
 
@@ -49,8 +71,6 @@ public class ImageFilterBot {
             System.out.println("You need to provide a token!");
             return;
         }
-
-        ImageChecker.init(images);
 
         try {
             jda = JDABuilder.createDefault(botToken).build();
@@ -69,7 +89,31 @@ public class ImageFilterBot {
         }
     }
 
-    public static ExecutorService getExecutorService() {
-        return executorService;
+    public static Set<String> getImages() {
+        return images;
+    }
+
+    public static JDA getJda() {
+        return jda;
+    }
+
+    public static long getOwnerId() {
+        return ownerId;
+    }
+
+    public static int getWarnPercentage() {
+        return warnPercentage;
+    }
+
+    public static int getBanPercentage() {
+        return banPercentage;
+    }
+
+    public static long getChannelId() {
+        return channelId;
+    }
+
+    public static ExecutorService getExecutor() {
+        return executor;
     }
 }

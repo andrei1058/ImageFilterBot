@@ -1,1 +1,7 @@
 /downloads/
+/target/
+/.idea/
+/FilterImageBot.iml
+/testimage.jpg
+/results/
+/dependency-reduced-pom.xml
